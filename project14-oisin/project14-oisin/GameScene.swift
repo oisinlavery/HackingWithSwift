@@ -15,10 +15,11 @@ class GameScene: SKScene {
     var gameScore: SKLabelNode!
     var score: Int = 0 {
         didSet {
-            gameScore.text = "Score: \(gameScore)"
+            gameScore.text = "Score: \(score)"
         }
     }
     var popupTime = 0.85
+    var numRounds = 0
     
     override func didMoveToView(view: SKView) {
         
@@ -46,6 +47,22 @@ class GameScene: SKScene {
     }
     
     func createEnemy() {
+
+        ++numRounds
+
+        if numRounds >= 30 {
+            for slot in slots {
+                slot.hide()
+            }
+
+            let gameOver = SKSpriteNode(imageNamed: "gameOver")
+            gameOver.position = CGPoint(x: 512, y: 384)
+            gameOver.zPosition = 1
+            addChild(gameOver)
+            
+            return
+        }
+
         popupTime *= 0.991
         
         slots = GKRandomSource.sharedRandom().arrayByShufflingObjectsInArray(slots) as! [WhackSlot]
@@ -71,9 +88,29 @@ class GameScene: SKScene {
             
             for node in nodes {
                 if node.name == "charFriend" {
-                    // they shouldn't have whacked this penguin
+
+                    let whackSlot = node.parent!.parent as! WhackSlot
+                    if !whackSlot.visible { continue }
+                    if whackSlot.isHit { continue }
+
+                    whackSlot.hit()
+                    score -= 5
+                    
+                    runAction(SKAction.playSoundFileNamed("whackBad.caf", waitForCompletion:false))
+
                 } else if node.name == "charEnemy" {
-                    // they should have whacked this one
+
+                    let whackSlot = node.parent!.parent as! WhackSlot
+                    if !whackSlot.visible { continue }
+                    if whackSlot.isHit { continue }
+
+                    whackSlot.charNode.xScale = 0.85
+                    whackSlot.charNode.yScale = 0.85
+
+                    whackSlot.hit()
+                    ++score
+                    
+                    runAction(SKAction.playSoundFileNamed("whack.caf", waitForCompletion:false))
                 }
             }
         }

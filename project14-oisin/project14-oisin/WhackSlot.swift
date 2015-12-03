@@ -37,7 +37,10 @@ class WhackSlot: SKNode {
     
     func show(hideTime hideTime: Double) {
         if visible { return }
-        
+
+        charNode.xScale = 1.0
+        charNode.yScale = 1.0
+
         charNode.runAction(SKAction.moveByX(0, y: 80, duration: 0.05))
         visible = true
         isHit = false
